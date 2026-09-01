@@ -1,0 +1,74 @@
+{% load static %}
+
+<div class="product-card {{ product.stock|yesno:'in-stock,disabled' }}">
+    <div class="product-image-wrapper">
+       {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+        {% else %}
+            <div class="product-image product-image-placeholder">
+                <span>📦</span>
+            </div>
+        {% endif %}
+        
+        {% if product.is_new %}
+            <span class="badge-new">Новинка</span>
+        {% endif %}
+        {% if product.discount %}
+            <span class="badge-discount">-{{ product.discount }}%</span>
+        {% endif %}
+        {% if not product.is_available or product.stock == 0 %}
+            <span class="badge-sold">Немає в наявності</span>
+        {% endif %}
+    </div>
+    
+    <div class="product-info">
+        <div class="product-title">
+            <a href="{% url 'store:product_detail' product.id %}">{{ product.name }}</a>
+        </div>
+        
+        <div class="product-rating">
+            {% if product.rating %}
+                {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= product.rating %}
+                        <span class="star filled">★</span>
+                    {% else %}
+                        <span class="star">★</span>
+                    {% endif %}
+                {% endfor %}
+                <span class="rating-count">({{ product.rating }})</span>
+            {% endif %}
+        </div>
+        
+        <div class="product-price-wrapper">
+            {% if product.discount and product.old_price %}
+                <span class="price-old">{{ product.old_price }} грн</span>
+                <span class="price-new">{{ product.price }} грн</span>
+            {% else %}
+                <span class="product-price">{{ product.price }} грн</span>
+            {% endif %}
+        </div>
+        
+        <div class="product-stock">
+            {% if product.stock > 0 %}
+                <span class="in-stock">✓ На складі: {{ product.stock }} шт</span>
+            {% else %}
+                <span class="out-of-stock">✗ Товар відсутній</span>
+            {% endif %}
+        </div>
+        
+        <div class="product-actions">
+            {% if product.stock > 0 %}
+                <a href="{% url 'store:order_views' product.id %}" class="btn-order">
+                    <i class="fas fa-shopping-cart"></i> Замовити
+                </a>
+            {% else %}
+                <button class="btn-order disabled" disabled>
+                    <i class="fas fa-times"></i> Немає в наявності
+                </button>
+            {% endif %}
+            <button class="btn-wishlist" data-product-id="{{ product.id }}">
+                <i class="far fa-heart"></i>
+            </button>
+        </div>
+    </div>
+</div>

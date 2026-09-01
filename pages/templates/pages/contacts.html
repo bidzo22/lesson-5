@@ -1,0 +1,32 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+  <h1>Контакти</h1>
+
+  {% if messages %}
+    {% for message in messages %}
+      <p class="message message-{{message.tags}}">{{message}}</p>
+    {% endfor%}
+  {% endif %}
+
+  <form method="POST" action="{% url 'contacts' %}" novalidate>
+    {{ form.non_field_errors }}  
+
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div style="margin-bottom: 15px;">
+        {{ field.label_tag }}
+        {{ field }}
+
+        {% if field.errors %}
+        <div style="color: red;">
+          {{ field.errors}}
+        </div>
+        {% endif%}
+      </div>
+    {% endfor %}
+
+    <button type="submit">Відправити</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,44 @@
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.product-card {
+    border: 1px solid #ccc;
+    padding: 20px;
+}
+
+.product-card.disabled {
+    opacity: 0.5;
+}
+
+.catalog{
+    display:flex;
+    flex-direction:row;
+    align-items:flex-start;
+    gap:30px;
+    width:100%;
+}
+
+.filters{
+    width:250px;
+    padding:20px;
+    border:1px solid #ddd;
+    border-radius:10px;
+}
+
+.products{
+    flex:1;
+}
+
+.filters input[type="number"]{
+    width:100%;
+    margin-bottom:10px;
+}
+
+.filters button{
+    width:100%;
+    padding:10px;
+    cursor:pointer;
+}

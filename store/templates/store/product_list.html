@@ -1,0 +1,91 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+{% endblock %}
+
+{% block title %}Каталог товарів | {{ block.super }}{% endblock %}
+
+{% block content %}
+
+
+
+<div class="catalog">
+
+    <!-- Ліва панель -->
+    <div class="filters">
+
+        <form method="GET">
+
+            <h3>Фільтри</h3>
+
+            <p>Ціна від</p>
+            <input type="number"
+                   name="min_price"
+                   value="{{ min_price }}">
+
+            <p>до</p>
+            <input type="number"
+                   name="max_price"
+                   value="{{ max_price }}">
+
+            <br><br>
+
+            <label>
+                <input type="checkbox"
+                       name="in_stock"
+                       value="1"
+                       {% if in_stock %}checked{% endif %}>
+                Є в наявності
+            </label>
+
+            <br><br>
+
+            <h4>Категорії</h4>
+
+            {% for key, value in category_names.items %}
+                <label>
+                    <input type="checkbox"
+                           name="category"
+                           value="{{ key }}"
+                           {% if key in categories %}checked{% endif %}>
+                    {{ value }}
+                </label>
+                <br>
+            {% endfor %}
+
+            <br>
+
+            <button type="submit">
+                Фільтрувати
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- Каталог -->
+    <div class="products">
+
+        {% if products %}
+
+            <div class="product-grid">
+
+                {% for product in products %}
+                    {% include "components/product_card.html" with show_stock=False %}
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p>Товарів не знайдено.</p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
