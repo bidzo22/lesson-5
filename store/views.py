@@ -8,6 +8,7 @@ from .models import Product, Category, Order
 
 #Допоміжні функції для фільтрації та сортування товарів
 def product_to_dict(product_id, product):
+
     """Перетворює товар у словник для JSON-відповіді."""
     return {
         "id": product_id,
@@ -17,7 +18,25 @@ def product_to_dict(product_id, product):
         "stock": product["stock"],
         "available": product["stock"] > 0,
     }
- 
+
+def get_product_source(product_id):
+    """Шукає товар спочатку у словнику PRODUCTS, а якщо немає - у базі даних Product."""
+    product = PRODUCTS.get(product_id)
+    if product is not None:
+        return product
+
+    try:
+        db_product = Product.objects.get(pk=product_id)
+    except Product.DoesNotExist:
+        return None
+
+    return {
+        "name": db_product.name,
+        "price": float(db_product.price),
+        "category": db_product.category.slug if db_product.category else "",
+        "stock": db_product.stock,
+    }
+
 def apply_filters(
     products_dict,
     sort=None,
@@ -96,7 +115,7 @@ def product_list(request):
 })
 
 def product_detail(request, product_id):
-    product = PRODUCTS.get(product_id)
+    product = get_product_source(product_id)
     if product is None:
         return JsonResponse(
             {"error": "Товар не знайдено"},
@@ -136,7 +155,7 @@ def category_view(request, category):
 
 @csrf_exempt
 def order_views(request, product_id):
-    product = PRODUCTS.get(product_id)
+    product = get_product_source(product_id)
 
     if product is None:
         return JsonResponse(

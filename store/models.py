@@ -45,19 +45,30 @@ class Product(models.Model):
         verbose_name_plural = "Товари"
         ordering = ['-created_at']
 
-class Order(models.Model):
+class TimeMixin(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата оновлення")
+
+    class Meta:
+        abstract = True    
+
+class Order(TimeMixin):
     product_id = models.IntegerField(verbose_name="ID товару")
     product_name = models.CharField(max_length=200, verbose_name="Назва товару")
     quantity = models.PositiveIntegerField(verbose_name="Кількість")
     total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Загальна сума")
     customer_name = models.CharField(max_length=100, verbose_name="Ім'я клієнта")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
-    
+
     def __str__(self):
         return f"Замовлення #{self.id} - {self.customer_name}"
-    
+
     class Meta:
         verbose_name = "Замовлення"
         verbose_name_plural = "Замовлення"
         ordering = ['-created_at']
+        constraints = [
+            models.CheckConstraint(check=models.Q(quantity__gt=0), name='order_quantity_positive'),
+            models.CheckConstraint(check=models.Q(total_price__gte=0), name='order_total_price_non_negative'),
+        ]
+
