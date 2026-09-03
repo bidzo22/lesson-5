@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from django.conf import settings
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -72,3 +73,54 @@ class Order(TimeMixin):
             models.CheckConstraint(check=models.Q(total_price__gte=0), name='order_total_price_non_negative'),
         ]
 
+class Comment(models.Model):
+    product = models.ForeignKey(Product, related_name='comments', on_delete=models.CASCADE, verbose_name="Товар")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments', verbose_name="Автор")
+    comment = models.TextField(verbose_name="Коментар")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
+
+    def __str__(self):
+        return f"Коментар від {self.author} до {self.product.name}"
+
+    class Meta:
+        verbose_name = "Коментар"
+        verbose_name_plural = "Коментарі"
+        ordering = ['-created_at']
+
+class Attribute(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Назва характеристики")
+    slug = models.SlugField(unique=True, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Характеристика"
+        verbose_name_plural = "Характеристики"
+
+
+class AttributeValue(models.Model):
+    attribute = models.ForeignKey(Attribute, related_name='values', on_delete=models.CASCADE, verbose_name="Характеристика")
+    value = models.CharField(max_length=100, verbose_name="Значення")
+
+    def __str__(self):
+        return f"{self.attribute.name}: {self.value}"
+
+    class Meta:
+        verbose_name = "Значення характеристики"
+        verbose_name_plural = "Значення характеристик"
+
+
+class ProductAttribute(models.Model):
+    product = models.ForeignKey(Product, related_name='attributes', on_delete=models.CASCADE, verbose_name="Товар")
+    attribute_value = models.ForeignKey(AttributeValue, related_name='products', on_delete=models.CASCADE, verbose_name="Значення характеристики")
+
+    def __str__(self):
+        return f"{self.product.name} - {self.attribute_value}"
+
+    class Meta:
+        verbose_name = "Характеристика товару"
+        verbose_name_plural = "Характеристики товарів"
+        constraints = [
+            models.UniqueConstraint(fields=['product', 'attribute_value'], name='unique_product_attribute_value'),
+        ]        
